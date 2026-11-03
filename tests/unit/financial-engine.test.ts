@@ -599,3 +599,4 @@ describe("KostKita Financial Domain Engine", () => {
     expect(totalDebts).toBe(totalReceivables);
   });
 });
+
