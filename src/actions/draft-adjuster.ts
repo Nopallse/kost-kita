@@ -131,43 +131,49 @@ ATURAN REKAYASA KEUANGAN:
      "explanation": "Penjelasan ringkas dalam bahasa Indonesia tentang apa saja yang telah diubah (1-2 kalimat ramah)."
    }`;
 
-    let responseText: string | undefined;
+    const SUPPORTED_MODELS = [
+      "gemini-3.5-flash-lite",
+      "gemini-3.8-flash",
+      "gemini-3.5-flash",
+      "gemini-flash-latest",
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+    ];
 
-    try {
-      const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: [
-          {
-            text: systemInstruction,
+    let responseText: string | undefined;
+    let lastError: any = null;
+
+    for (const model of SUPPORTED_MODELS) {
+      try {
+        const response = await ai.models.generateContent({
+          model,
+          contents: [
+            {
+              text: systemInstruction,
+            },
+          ],
+          config: {
+            responseMimeType: "application/json",
+            temperature: 0.2,
           },
-        ],
-        config: {
-          responseMimeType: "application/json",
-          temperature: 0.2,
-        },
-      });
-      responseText = response.text;
-    } catch (primaryErr) {
-      console.warn("Primary gemini-2.0-flash failed for adjustDraft, falling back to gemini-1.5-flash:", primaryErr);
-      const fallbackResponse = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
-        contents: [
-          {
-            text: systemInstruction,
-          },
-        ],
-        config: {
-          responseMimeType: "application/json",
-          temperature: 0.2,
-        },
-      });
-      responseText = fallbackResponse.text;
+        });
+
+        if (response.text) {
+          responseText = response.text;
+          break;
+        }
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`Model ${model} failed for adjustDraft, trying next candidate:`, err?.message || err);
+      }
     }
 
     if (!responseText) {
       return {
         success: false,
-        error: "Gemini tidak memberikan respons modifikasi draf.",
+        error:
+          lastError?.message ||
+          "Gemini tidak memberikan respons modifikasi draf. Silakan coba kembali.",
       };
     }
 
@@ -287,3 +293,4 @@ ATURAN REKAYASA KEUANGAN:
     };
   }
 }
+

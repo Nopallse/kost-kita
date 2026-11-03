@@ -53,3 +53,4 @@ describe("Receipt Scanner - Data Extraction & Formatting", () => {
     expect(total).toBe(88000);
   });
 });
+

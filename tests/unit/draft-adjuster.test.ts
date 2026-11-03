@@ -63,3 +63,4 @@ describe("AI Draft Adjuster - Domain Logic & Sanitization", () => {
     expect(payments[0].amount).toBe(35000);
   });
 });
+

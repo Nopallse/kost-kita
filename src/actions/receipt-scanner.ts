@@ -85,57 +85,56 @@ export async function scanReceiptAction(payload: {
 
     const ai = new GoogleGenAI({ apiKey });
 
-    // Try gemini-2.0-flash first, fallback to gemini-1.5-flash if unavailable
+    // Multi-model resilience: try active models in priority order
+    const SUPPORTED_MODELS = [
+      "gemini-3.5-flash-lite",
+      "gemini-3.8-flash",
+      "gemini-3.5-flash",
+      "gemini-flash-latest",
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+    ];
+
     let responseText: string | undefined;
+    let lastError: any = null;
 
-    try {
-      const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: [
-          {
-            inlineData: {
-              data: cleanBase64,
-              mimeType: validMimeType,
+    for (const model of SUPPORTED_MODELS) {
+      try {
+        const response = await ai.models.generateContent({
+          model,
+          contents: [
+            {
+              inlineData: {
+                data: cleanBase64,
+                mimeType: validMimeType,
+              },
             },
+            {
+              text: SYSTEM_INSTRUCTION,
+            },
+          ],
+          config: {
+            responseMimeType: "application/json",
+            temperature: 0.1,
           },
-          {
-            text: SYSTEM_INSTRUCTION,
-          },
-        ],
-        config: {
-          responseMimeType: "application/json",
-          temperature: 0.1,
-        },
-      });
+        });
 
-      responseText = response.text;
-    } catch (primaryErr) {
-      console.warn("Primary gemini-2.0-flash failed, attempting fallback to gemini-1.5-flash:", primaryErr);
-      const fallbackResponse = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
-        contents: [
-          {
-            inlineData: {
-              data: cleanBase64,
-              mimeType: validMimeType,
-            },
-          },
-          {
-            text: SYSTEM_INSTRUCTION,
-          },
-        ],
-        config: {
-          responseMimeType: "application/json",
-          temperature: 0.1,
-        },
-      });
-      responseText = fallbackResponse.text;
+        if (response.text) {
+          responseText = response.text;
+          break;
+        }
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`Model ${model} failed, trying next candidate:`, err?.message || err);
+      }
     }
 
     if (!responseText) {
       return {
         success: false,
-        error: "Gemini tidak mengembalikan hasil teks dari gambar struk.",
+        error:
+          lastError?.message ||
+          "Gemini tidak dapat memproses gambar struk. Silakan coba kembali atau gunakan foto yang lebih jelas.",
       };
     }
 
@@ -201,3 +200,4 @@ export async function scanReceiptAction(payload: {
     };
   }
 }
+
