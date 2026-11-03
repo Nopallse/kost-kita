@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js
+.next/
+out/
+
+# Production
+build/
+dist/
+
+# Environment
+.env
+.env*.local
+!.env.example
+
+# Prisma
+# Keep migrations, ignore generated client if needed or let git track it
+*.db
+*.db-journal
+
+# Testing
+coverage/
+test-results/
+playwright-report/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Antigravity artifacts / logs if needed (handled by appDataDir)

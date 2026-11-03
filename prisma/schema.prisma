@@ -1,0 +1,237 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum TransactionStatus {
+  CONFIRMED
+  VOIDED
+}
+
+enum SplitType {
+  SHARED
+  PERSONAL
+  CUSTOM
+}
+
+enum SettlementStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+}
+
+model User {
+  id            String            @id @default(cuid())
+  name          String?
+  email         String            @unique
+  password      String?           // Hashed password for credentials login
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  memberships   HouseholdMember[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([email])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Household {
+  id           String            @id @default(cuid())
+  name         String
+  inviteCode   String            @unique @default(cuid())
+  currency     String            @default("IDR")
+  members      HouseholdMember[]
+  categories   Category[]
+  transactions Transaction[]
+  settlements  Settlement[]
+  auditLogs    AuditLog[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+}
+
+model HouseholdMember {
+  id          String   @id @default(cuid())
+  householdId String
+  userId      String
+  role        Role     @default(MEMBER)
+  nickname    String?
+  isActive    Boolean  @default(true)
+  joinedAt    DateTime @default(now())
+
+  household           Household            @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments            TransactionPayment[]
+  allocations         ItemAllocation[]
+  createdTransactions Transaction[]        @relation("TransactionCreator")
+  sentSettlements     Settlement[]         @relation("SettlementPayer")
+  receivedSettlements Settlement[]         @relation("SettlementPayee")
+
+  @@unique([householdId, userId])
+  @@index([householdId])
+  @@index([userId])
+}
+
+model Category {
+  id          String        @id @default(cuid())
+  householdId String
+  name        String
+  icon        String?
+  isDefault   Boolean       @default(false)
+  household   Household     @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@unique([householdId, name])
+  @@index([householdId])
+}
+
+model Transaction {
+  id              String            @id @default(cuid())
+  householdId     String
+  creatorMemberId String
+  title           String
+  date            DateTime          @default(now())
+  status          TransactionStatus @default(CONFIRMED)
+  totalAmount     BigInt            // Integer IDR (Rupiah)
+  categoryId      String?
+  notes           String?
+  receiptUrl      String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  household Household          @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  creator   HouseholdMember    @relation("TransactionCreator", fields: [creatorMemberId], references: [id])
+  category  Category?          @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  items     TransactionItem[]
+  payments  TransactionPayment[]
+
+  @@index([householdId, date])
+  @@index([householdId, status])
+  @@index([creatorMemberId])
+}
+
+model TransactionItem {
+  id            String           @id @default(cuid())
+  transactionId String
+  name          String
+  quantity      Int              @default(1)
+  unitPrice     BigInt           // IDR integer
+  subtotal      BigInt           // quantity * unitPrice
+  splitType     SplitType        @default(SHARED)
+
+  transaction Transaction      @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  allocations ItemAllocation[]
+
+  @@index([transactionId])
+}
+
+model ItemAllocation {
+  id                String          @id @default(cuid())
+  transactionItemId String
+  memberId          String
+  amount            BigInt          // Share of item subtotal
+
+  item   TransactionItem @relation(fields: [transactionItemId], references: [id], onDelete: Cascade)
+  member HouseholdMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([transactionItemId, memberId])
+  @@index([transactionItemId])
+  @@index([memberId])
+}
+
+model TransactionPayment {
+  id            String          @id @default(cuid())
+  transactionId String
+  memberId      String
+  amount        BigInt          // Actual money disbursed
+
+  transaction Transaction     @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  member      HouseholdMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([transactionId, memberId])
+  @@index([transactionId])
+  @@index([memberId])
+}
+
+model Settlement {
+  id              String           @id @default(cuid())
+  householdId     String
+  payerMemberId   String           // Sent reimbursement
+  payeeMemberId   String           // Received reimbursement
+  amount          BigInt           // IDR integer
+  status          SettlementStatus @default(PENDING)
+  proofUrl        String?
+  notes           String?
+  confirmedAt     DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  household   Household       @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  payerMember HouseholdMember @relation("SettlementPayer", fields: [payerMemberId], references: [id])
+  payeeMember HouseholdMember @relation("SettlementPayee", fields: [payeeMemberId], references: [id])
+
+  @@index([householdId, status])
+  @@index([payerMemberId])
+  @@index([payeeMemberId])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  householdId String
+  entityType  String   // e.g. "TRANSACTION", "SETTLEMENT", "MEMBER"
+  entityId    String
+  action      String   // "CREATE", "UPDATE", "VOID", "CONFIRM"
+  metadata    Json?
+  actorUserId String?
+  createdAt   DateTime @default(now())
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  @@index([householdId, entityType, entityId])
+  @@index([householdId, createdAt])
+}

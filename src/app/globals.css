@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 20% 98%;
+    --foreground: 24 10% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 24 10% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 24 10% 10%;
+
+    --primary: 152 40% 30%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 40 10% 94%;
+    --secondary-foreground: 24 10% 15%;
+
+    --muted: 40 10% 93%;
+    --muted-foreground: 25 5% 45%;
+
+    --accent: 40 10% 92%;
+    --accent-foreground: 24 10% 10%;
+
+    --destructive: 1 50% 48%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 40 8% 88%;
+    --input: 40 8% 88%;
+    --ring: 152 40% 30%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 24 10% 8%;
+    --foreground: 40 10% 96%;
+
+    --card: 24 10% 10%;
+    --card-foreground: 40 10% 96%;
+
+    --popover: 24 10% 10%;
+    --popover-foreground: 40 10% 96%;
+
+    --primary: 152 40% 45%;
+    --primary-foreground: 24 10% 8%;
+
+    --secondary: 24 10% 14%;
+    --secondary-foreground: 40 10% 96%;
+
+    --muted: 24 10% 14%;
+    --muted-foreground: 25 5% 65%;
+
+    --accent: 24 10% 16%;
+    --accent-foreground: 40 10% 96%;
+
+    --destructive: 1 50% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 24 10% 18%;
+    --input: 24 10% 18%;
+    --ring: 152 40% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Financial numbers always render with tabular numbers */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
