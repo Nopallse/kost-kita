@@ -54,3 +54,4 @@ export function InviteCodeCard({ inviteCode }: InviteCodeCardProps) {
     </div>
   );
 }
+

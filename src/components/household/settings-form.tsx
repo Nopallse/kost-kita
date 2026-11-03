@@ -167,3 +167,4 @@ export function SettingsForm({ household }: SettingsFormProps) {
     </div>
   );
 }
+
