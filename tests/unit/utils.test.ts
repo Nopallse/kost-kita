@@ -27,3 +27,4 @@ describe("Fintech Utility & BigInt IDR Formatter", () => {
     expect(zero.formatted).not.toContain("-");
   });
 });
+

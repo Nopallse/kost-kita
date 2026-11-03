@@ -33,3 +33,4 @@ export const authConfig = {
   },
   providers: [],
 } satisfies NextAuthConfig;
+

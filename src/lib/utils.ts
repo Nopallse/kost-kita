@@ -41,3 +41,4 @@ export function formatNetBalance(amount: bigint | number): {
 
   return { formatted, isPositive, isNegative, isZero };
 }
+

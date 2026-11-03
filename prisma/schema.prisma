@@ -235,3 +235,4 @@ model AuditLog {
   @@index([householdId, entityType, entityId])
   @@index([householdId, createdAt])
 }
+
