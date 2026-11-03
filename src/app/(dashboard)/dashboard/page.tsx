@@ -4,9 +4,24 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PlusCircle, UserPlus, Home, ArrowUpRight, ArrowDownRight, Wallet, Receipt } from "lucide-react";
+import { formatIDR, formatNetBalance } from "@/lib/utils";
+import { getHouseholdBalanceSummary } from "@/lib/balance-service";
+import { SpendingChart } from "@/components/dashboard/spending-chart";
+import { SharedVsPersonalChart } from "@/components/dashboard/shared-vs-personal-chart";
+import { SettlementDialog } from "@/components/settlements/settlement-dialog";
+import {
+  PlusCircle,
+  UserPlus,
+  Home,
+  Scale,
+  Receipt,
+  ArrowRight,
+  TrendingUp,
+  ShieldCheck,
+  BarChart3,
+} from "lucide-react";
 import Link from "next/link";
-import { formatIDR } from "@/lib/utils";
+import { TransactionStatus, SplitType } from "@prisma/client";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -22,7 +37,16 @@ export default async function DashboardPage() {
       isActive: true,
     },
     include: {
-      household: true,
+      household: {
+        include: {
+          members: {
+            where: { isActive: true },
+            include: {
+              user: { select: { name: true, email: true } },
+            },
+          },
+        },
+      },
     },
   });
 
@@ -77,7 +101,7 @@ export default async function DashboardPage() {
             <CardContent>
               <Link href="/household/join">
                 <Button variant="outline" className="w-full text-xs gap-1.5 border-stone-300">
-                  <ArrowUpRight className="h-3.5 w-3.5" />
+                  <ArrowRight className="h-3.5 w-3.5" />
                   Masukkan Kode
                 </Button>
               </Link>
@@ -88,17 +112,86 @@ export default async function DashboardPage() {
     );
   }
 
-  // Member has active household: query counts and recent transactions
-  const household = activeMembership.household;
+  const { household } = activeMembership;
 
-  const [transactionCount, memberCount] = await Promise.all([
-    prisma.transaction.count({
-      where: { householdId: household.id },
-    }),
-    prisma.householdMember.count({
-      where: { householdId: household.id, isActive: true },
-    }),
-  ]);
+  // 1. Fetch balance data
+  const balanceData = await getHouseholdBalanceSummary(
+    household.id,
+    session.user.id
+  );
+
+  const currentUserPosition = balanceData.enrichedPositions.find(
+    (p) => p.isCurrentUser
+  );
+
+  const userNet = currentUserPosition
+    ? formatNetBalance(currentUserPosition.netBalance)
+    : { formatted: formatIDR(0), isPositive: false, isNegative: false, isZero: true };
+
+  // 2. Fetch Recent Transactions & Split Proportions
+  const recentTransactions = await prisma.transaction.findMany({
+    where: {
+      householdId: household.id,
+    },
+    include: {
+      creator: {
+        include: { user: { select: { name: true } } },
+      },
+      items: true,
+      payments: {
+        include: {
+          member: {
+            include: { user: { select: { name: true } } },
+          },
+        },
+      },
+    },
+    orderBy: { date: "desc" },
+    take: 5,
+  });
+
+  // Calculate Proportion of Shared vs Personal vs Custom
+  const allItems = await prisma.transactionItem.findMany({
+    where: {
+      transaction: {
+        householdId: household.id,
+        status: TransactionStatus.CONFIRMED,
+      },
+    },
+    select: {
+      splitType: true,
+      subtotal: true,
+    },
+  });
+
+  let sharedTotal = 0;
+  let personalTotal = 0;
+  let customTotal = 0;
+
+  for (const item of allItems) {
+    const amt = Number(item.subtotal);
+    if (item.splitType === SplitType.SHARED) sharedTotal += amt;
+    else if (item.splitType === SplitType.PERSONAL) personalTotal += amt;
+    else if (item.splitType === SplitType.CUSTOM) customTotal += amt;
+  }
+
+  // Monthly Spending Trend Data for Chart
+  const spendingTrendData = recentTransactions
+    .filter((tx) => tx.status === TransactionStatus.CONFIRMED)
+    .slice(0, 6)
+    .reverse()
+    .map((tx) => ({
+      date: new Intl.DateTimeFormat("id-ID", {
+        day: "numeric",
+        month: "short",
+      }).format(new Date(tx.date)),
+      amount: Number(tx.totalAmount),
+    }));
+
+  const memberOptions = household.members.map((m) => ({
+    id: m.id,
+    name: m.nickname || m.user.name || m.user.email?.split("@")[0] || "Anggota",
+  }));
 
   return (
     <div className="space-y-8">
@@ -107,7 +200,7 @@ export default async function DashboardPage() {
         <div>
           <div className="flex items-center space-x-2">
             <span className="text-xs uppercase tracking-wider text-stone-500 font-semibold">
-              Rumah Tangga Aktif
+              Ikhtisar Rumah Tangga
             </span>
             <Badge variant="outline" className="text-[11px] font-mono">
               {household.currency}
@@ -117,11 +210,11 @@ export default async function DashboardPage() {
             {household.name}
           </h1>
           <p className="text-xs text-stone-500 mt-0.5">
-            Kode Undangan: <span className="font-mono font-medium text-stone-800 select-all">{household.inviteCode}</span> • {memberCount} Anggota
+            Kode Undangan: <span className="font-mono font-medium text-stone-800 select-all">{household.inviteCode}</span> • {household.members.length} Anggota
           </p>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2.5">
           <Link href="/transactions/new">
             <Button size="sm" className="bg-emerald-800 hover:bg-emerald-900 text-white gap-1.5 text-xs">
               <PlusCircle className="h-3.5 w-3.5" />
@@ -131,57 +224,274 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* KPI Highlights */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* 4 Primary KPI Highlight Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Your Net Position */}
         <Card className="border-stone-200/80 bg-white shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription className="text-xs uppercase tracking-wider font-medium text-stone-500">
               Posisi Saldo Anda
             </CardDescription>
-            <CardTitle className="text-2xl font-mono tabular-nums font-semibold text-stone-900">
-              {formatIDR(0)}
+            <CardTitle
+              className={`text-2xl font-mono tabular-nums font-semibold ${
+                userNet.isPositive
+                  ? "text-emerald-800"
+                  : userNet.isNegative
+                  ? "text-rose-800"
+                  : "text-stone-800"
+              }`}
+            >
+              {userNet.formatted}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-stone-500">
-              Semua pengeluaran terhitung seimbang (balanced).
+            <p className="text-[11px] text-stone-500">
+              {userNet.isPositive && "Piutang (Teman berutang ke Anda)"}
+              {userNet.isNegative && "Utang (Perlu transfer pelunasan)"}
+              {userNet.isZero && "Lunas (Saldo seimbang)"}
             </p>
           </CardContent>
         </Card>
 
+        {/* Total Expense */}
         <Card className="border-stone-200/80 bg-white shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription className="text-xs uppercase tracking-wider font-medium text-stone-500">
-              Total Transaksi Tercatat
+              Total Pengeluaran Kas
             </CardDescription>
             <CardTitle className="text-2xl font-mono tabular-nums font-semibold text-stone-900">
-              {transactionCount}
+              {formatIDR(balanceData.report.totalHouseholdExpense)}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-stone-500">
-              Transaksi tercatat di buku kas kost.
+            <p className="text-[11px] text-stone-500">
+              Akumulasi belanja seluruh anggota
             </p>
           </CardContent>
         </Card>
 
+        {/* Shared vs Personal */}
         <Card className="border-stone-200/80 bg-white shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription className="text-xs uppercase tracking-wider font-medium text-stone-500">
-              Status Settlement
+              Belanja Bersama (Patungan)
+            </CardDescription>
+            <CardTitle className="text-2xl font-mono tabular-nums font-semibold text-emerald-800">
+              {formatIDR(sharedTotal)}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-[11px] text-stone-500">
+              Pribadi: {formatIDR(personalTotal)}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Pending Settlements */}
+        <Card className="border-stone-200/80 bg-white shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription className="text-xs uppercase tracking-wider font-medium text-stone-500">
+              Pelunasan Tertunda
             </CardDescription>
             <CardTitle className="text-2xl font-semibold text-stone-900">
-              Lancar
+              {balanceData.pendingSettlementsCount} Klaim
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-stone-500">
-              Tidak ada pelunasan tertunda (pending).
-            </p>
+            <Link
+              href="/settlements"
+              className="text-[11px] text-emerald-800 font-medium hover:underline flex items-center gap-1"
+            >
+              Lihat di menu pelunasan
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Visual Analytics Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left: Spending Trend Chart */}
+        <Card className="lg:col-span-2 border-stone-200/80 bg-white shadow-sm">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-base font-semibold text-stone-900 flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-emerald-800" />
+                  Tren Pengeluaran Transaksi Terbaru
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Nominal transaksi terkonfirmasi per tanggal belanja.
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <SpendingChart data={spendingTrendData} />
+          </CardContent>
+        </Card>
+
+        {/* Right: Shared vs Personal Proportion */}
+        <Card className="border-stone-200/80 bg-white shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold text-stone-900 flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-stone-700" />
+              Proporsi Pengeluaran
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Perbandingan tipe alokasi belanja.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <SharedVsPersonalChart
+              sharedAmount={sharedTotal}
+              personalAmount={personalTotal}
+              customAmount={customTotal}
+            />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Bottom Grid: Debt Simplification & Recent Transactions Feed */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Simplified Debts Box */}
+        <Card className="border-stone-200/80 bg-white shadow-sm">
+          <CardHeader className="pb-3 border-b border-stone-100 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-sm font-semibold text-stone-900 flex items-center gap-2">
+                <Scale className="h-4 w-4 text-emerald-800" />
+                Siapa Berutang ke Siapa
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Instruksi transfer tercepat untuk menyeimbangkan kas.
+              </CardDescription>
+            </div>
+            <Link href="/balances">
+              <Button variant="ghost" size="sm" className="text-xs text-stone-600 hover:text-stone-900">
+                Selengkapnya
+              </Button>
+            </Link>
+          </CardHeader>
+          <CardContent className="p-4 space-y-2.5">
+            {balanceData.simplifiedDebts.length === 0 ? (
+              <div className="py-6 text-center text-xs text-stone-500 space-y-1">
+                <ShieldCheck className="h-6 w-6 text-emerald-700 mx-auto" />
+                <p>Semua saldo anggota telah seimbang sempurna.</p>
+              </div>
+            ) : (
+              balanceData.simplifiedDebts.slice(0, 4).map((debt, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 bg-stone-50/70 border border-stone-200/70 rounded-md flex items-center justify-between text-xs"
+                >
+                  <div className="flex items-center space-x-2">
+                    <span className="font-semibold text-stone-900">
+                      {debt.fromMemberName}
+                      {debt.isCurrentUserDebtor && " (Anda)"}
+                    </span>
+                    <ArrowRight className="h-3 w-3 text-stone-400" />
+                    <span className="font-semibold text-stone-900">
+                      {debt.toMemberName}
+                      {debt.isCurrentUserCreditor && " (Anda)"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono font-bold text-stone-900 tabular-nums">
+                      {formatIDR(debt.amount)}
+                    </span>
+
+                    {debt.isCurrentUserDebtor && (
+                      <SettlementDialog
+                        householdId={household.id}
+                        currentMemberId={activeMembership.id}
+                        members={memberOptions}
+                        prefilledPayeeId={debt.toMemberId}
+                        prefilledAmount={Number(debt.amount)}
+                        triggerButtonText="Bayar"
+                      />
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Recent Transactions Feed */}
+        <Card className="border-stone-200/80 bg-white shadow-sm">
+          <CardHeader className="pb-3 border-b border-stone-100 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-sm font-semibold text-stone-900 flex items-center gap-2">
+                <Receipt className="h-4 w-4 text-stone-700" />
+                Transaksi Belanja Terbaru
+              </CardTitle>
+              <CardDescription className="text-xs">
+                5 catatan pengeluaran terakhir di buku kas.
+              </CardDescription>
+            </div>
+            <Link href="/transactions">
+              <Button variant="ghost" size="sm" className="text-xs text-stone-600 hover:text-stone-900">
+                Semua Transaksi
+              </Button>
+            </Link>
+          </CardHeader>
+          <CardContent className="p-4 space-y-2.5">
+            {recentTransactions.length === 0 ? (
+              <div className="py-6 text-center text-xs text-stone-500">
+                Belum ada transaksi tercatat.
+              </div>
+            ) : (
+              recentTransactions.map((tx) => {
+                const dateStr = new Intl.DateTimeFormat("id-ID", {
+                  day: "numeric",
+                  month: "short",
+                }).format(new Date(tx.date));
+                const isVoided = tx.status === TransactionStatus.VOIDED;
+
+                return (
+                  <Link
+                    key={tx.id}
+                    href={`/transactions/${tx.id}`}
+                    className="block p-3 bg-stone-50/70 border border-stone-200/70 rounded-md hover:bg-stone-100/70 transition-colors"
+                  >
+                    <div className="flex items-center justify-between text-xs">
+                      <div>
+                        <div
+                          className={`font-semibold text-stone-900 ${
+                            isVoided ? "line-through text-stone-400" : ""
+                          }`}
+                        >
+                          {tx.title}
+                        </div>
+                        <div className="text-[11px] text-stone-400 mt-0.5">
+                          {dateStr} • {tx.items.length} item • oleh{" "}
+                          {tx.creator.nickname || tx.creator.user.name}
+                        </div>
+                      </div>
+
+                      <div className="text-right space-y-0.5">
+                        <div
+                          className={`font-mono font-semibold tabular-nums ${
+                            isVoided ? "line-through text-stone-400" : "text-stone-900"
+                          }`}
+                        >
+                          {formatIDR(tx.totalAmount)}
+                        </div>
+                        {isVoided && (
+                          <Badge variant="destructive" className="text-[9px] py-0">
+                            Dibatalkan
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })
+            )}
           </CardContent>
         </Card>
       </div>
     </div>
   );
 }
-

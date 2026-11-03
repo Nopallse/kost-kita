@@ -4,12 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   LayoutDashboard,
   Receipt,
   Scale,
   HandCoins,
+  BarChart3,
   Home,
   LogOut,
   User as UserIcon,
@@ -31,6 +31,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
     { href: "/transactions", label: "Transaksi", icon: Receipt },
     { href: "/balances", label: "Saldo & Utang", icon: Scale },
     { href: "/settlements", label: "Pelunasan", icon: HandCoins },
+    { href: "/reports", label: "Laporan", icon: BarChart3 },
     { href: "/household", label: "Rumah Tangga", icon: Home },
   ];
 
@@ -96,4 +97,3 @@ export function DashboardNav({ user }: DashboardNavProps) {
     </header>
   );
 }
-

@@ -393,3 +393,4 @@ export default async function BalancesPage() {
     </div>
   );
 }
+

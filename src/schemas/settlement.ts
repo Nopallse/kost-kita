@@ -24,3 +24,4 @@ export const rejectSettlementSchema = z.object({
 });
 
 export type RejectSettlementInput = z.infer<typeof rejectSettlementSchema>;
+
