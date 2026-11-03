@@ -28,3 +28,4 @@ export const SettlementStatus = {
   CONFIRMED: "CONFIRMED",
   REJECTED: "REJECTED",
 } as const;
+
