@@ -545,7 +545,7 @@ export function TransactionForm({
                     <Input
                       type="number"
                       min="0"
-                      step="500"
+                      step="1"
                       placeholder="0"
                       value={item.unitPrice || ""}
                       onChange={(e) =>
@@ -727,7 +727,7 @@ export function TransactionForm({
                               <input
                                 type="number"
                                 min="0"
-                                step="500"
+                                step="1"
                                 value={curAlloc || ""}
                                 placeholder="0"
                                 onChange={(e) => {
@@ -826,7 +826,7 @@ export function TransactionForm({
                 <Input
                   type="number"
                   min="0"
-                  step="500"
+                  step="1"
                   value={payment.amount || ""}
                   onChange={(e) =>
                     handleUpdatePayment(pIndex, {

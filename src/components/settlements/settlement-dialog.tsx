@@ -160,7 +160,7 @@ export function SettlementDialog({
                   <Input
                     type="number"
                     min="1"
-                    step="500"
+                    step="1"
                     placeholder="0"
                     value={amount || ""}
                     onChange={(e) =>
