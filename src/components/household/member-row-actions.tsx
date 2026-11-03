@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Role } from "@prisma/client";
+import { Role } from "@/types/enums";
 import { updateMemberRoleAction, toggleMemberActiveAction } from "@/actions/household";
 import { Button } from "@/components/ui/button";
 import { Shield, ShieldAlert, UserMinus, UserCheck, Loader2 } from "lucide-react";
