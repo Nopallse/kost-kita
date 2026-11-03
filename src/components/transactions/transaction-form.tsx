@@ -3,6 +3,8 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { createTransactionAction } from "@/actions/transactions";
+import { ReceiptScannerDropzone } from "@/components/transactions/receipt-scanner-dropzone";
+import type { ScannedReceiptData } from "@/actions/receipt-scanner";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -138,6 +140,37 @@ export function TransactionForm({
 
     return map;
   }, [items, members]);
+
+  // AI Receipt Scanner Handler
+  const handleReceiptScanned = (scannedData: ScannedReceiptData) => {
+    if (scannedData.suggestedTitle) {
+      setTitle(scannedData.suggestedTitle);
+    }
+    if (scannedData.date) {
+      setDate(scannedData.date);
+    }
+    if (scannedData.notes) {
+      setNotes((prev) => (prev ? `${prev} | ${scannedData.notes}` : scannedData.notes!));
+    }
+    if (scannedData.items && scannedData.items.length > 0) {
+      const newItems: FormItem[] = scannedData.items.map((it, idx) => ({
+        id: `item-scanned-${Date.now()}-${idx}`,
+        name: it.name,
+        quantity: it.quantity,
+        unitPrice: it.unitPrice,
+        splitType: "SHARED",
+        participantMemberIds: members.map((m) => m.id),
+        assignedMemberId: currentMemberId,
+        customAllocations: members.map((m) => ({ memberId: m.id, amount: 0 })),
+      }));
+      setItems(newItems);
+
+      const totalScanned =
+        scannedData.totalAmount ||
+        newItems.reduce((acc, it) => acc + it.quantity * it.unitPrice, 0);
+      setPayments([{ memberId: currentMemberId, amount: totalScanned }]);
+    }
+  };
 
   // Item Management Handlers
   const handleAddItem = () => {
@@ -296,6 +329,12 @@ export function TransactionForm({
           <div>{errorMessage}</div>
         </div>
       )}
+
+      {/* AI Receipt Scanner Dropzone */}
+      <ReceiptScannerDropzone
+        householdId={householdId}
+        onReceiptScanned={handleReceiptScanned}
+      />
 
       {/* 1. Header Information */}
       <Card className="border-stone-200/80 bg-white shadow-sm">
