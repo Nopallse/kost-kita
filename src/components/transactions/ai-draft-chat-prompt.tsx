@@ -121,6 +121,11 @@ export function AiDraftChatPrompt({
             className="w-full text-xs bg-white border border-stone-300 rounded-lg px-3 py-2 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-900 focus:border-stone-900 disabled:opacity-50"
           />
         </div>
+        
+      </div>
+
+      {/* Quick Suggestion Chips */}
+      <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
         <Button
           type="button"
           size="sm"
@@ -135,27 +140,6 @@ export function AiDraftChatPrompt({
           )}
           Terapkan
         </Button>
-      </div>
-
-      {/* Quick Suggestion Chips */}
-      <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-        <span className="text-[11px] text-stone-500 flex items-center gap-1 mr-1">
-          <CornerDownLeft className="h-3 w-3" /> Coba cepat:
-        </span>
-        {suggestions.map((s, idx) => (
-          <button
-            key={idx}
-            type="button"
-            disabled={isLoading}
-            onClick={() => {
-              setPrompt(s);
-              handleSubmit(s);
-            }}
-            className="text-[11px] bg-white hover:bg-stone-100 text-stone-700 border border-stone-200/80 rounded-md px-2 py-0.5 transition-colors disabled:opacity-50"
-          >
-            {s}
-          </button>
-        ))}
       </div>
 
       {/* AI Explanation / Result Toast */}
