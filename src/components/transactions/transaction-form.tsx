@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { createTransactionAction } from "@/actions/transactions";
 import { ReceiptScannerDropzone } from "@/components/transactions/receipt-scanner-dropzone";
 import type { ScannedReceiptData } from "@/actions/receipt-scanner";
+import { AiDraftChatPrompt } from "@/components/transactions/ai-draft-chat-prompt";
+import type { TransactionDraftState } from "@/actions/draft-adjuster";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -169,6 +171,56 @@ export function TransactionForm({
         scannedData.totalAmount ||
         newItems.reduce((acc, it) => acc + it.quantity * it.unitPrice, 0);
       setPayments([{ memberId: currentMemberId, amount: totalScanned }]);
+    }
+  };
+
+  // Current draft state snapshot for AI Copilot
+  const currentDraftState: TransactionDraftState = React.useMemo(
+    () => ({
+      title,
+      date,
+      notes,
+      items: items.map((it) => ({
+        id: it.id,
+        name: it.name,
+        quantity: it.quantity,
+        unitPrice: it.unitPrice,
+        splitType: it.splitType,
+        participantMemberIds: it.participantMemberIds,
+        assignedMemberId: it.assignedMemberId,
+        customAllocations: it.customAllocations,
+      })),
+      payments: payments.map((p) => ({
+        memberId: p.memberId,
+        amount: p.amount,
+      })),
+    }),
+    [title, date, notes, items, payments]
+  );
+
+  const handleDraftAdjusted = (newDraft: TransactionDraftState) => {
+    if (newDraft.title) setTitle(newDraft.title);
+    if (newDraft.date) setDate(newDraft.date);
+    if (newDraft.notes !== undefined) setNotes(newDraft.notes || "");
+    if (newDraft.items && newDraft.items.length > 0) {
+      setItems(
+        newDraft.items.map((it, idx) => ({
+          id: it.id || `item-adj-${Date.now()}-${idx}`,
+          name: it.name,
+          quantity: it.quantity,
+          unitPrice: it.unitPrice,
+          splitType: it.splitType,
+          participantMemberIds: it.participantMemberIds,
+          assignedMemberId: it.assignedMemberId || currentMemberId,
+          customAllocations:
+            it.customAllocations && it.customAllocations.length > 0
+              ? it.customAllocations
+              : members.map((m) => ({ memberId: m.id, amount: 0 })),
+        }))
+      );
+    }
+    if (newDraft.payments && newDraft.payments.length > 0) {
+      setPayments(newDraft.payments);
     }
   };
 
@@ -387,6 +439,15 @@ export function TransactionForm({
           </div>
         </CardContent>
       </Card>
+
+      {/* AI Draft Chat Prompt Copilot */}
+      <AiDraftChatPrompt
+        householdId={householdId}
+        currentMemberId={currentMemberId}
+        members={members}
+        currentDraft={currentDraftState}
+        onDraftAdjusted={handleDraftAdjusted}
+      />
 
       {/* 2. Itemized Breakdown */}
       <div className="space-y-4">
