@@ -6,7 +6,8 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "KostKita",
     description:
       "Sistem manajemen finansial, pencatatan belanja bersama, dan pelunasan tempat tinggal bersama.",
-    start_url: "/dashboard",
+    id: "/",
+    start_url: "/",
     display: "standalone",
     background_color: "#FAF9F5",
     theme_color: "#2D6A4F",
