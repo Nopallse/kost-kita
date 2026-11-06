@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatIDR } from "@/lib/utils";
-import { HandCoins, Loader2, Send, X, AlertCircle } from "lucide-react";
+import { HandCoins, Loader2, Send, X, AlertCircle, CheckCircle2 } from "lucide-react";
 
 interface MemberOption {
   id: string;
@@ -110,10 +110,10 @@ export function SettlementDialog({
                 <div>
                   <CardTitle className="text-base font-semibold text-stone-900 flex items-center gap-2">
                     <HandCoins className="h-4 w-4 text-emerald-800" />
-                    Catat Transfer Pelunasan
+                    Catat Pelunasan Utang
                   </CardTitle>
                   <CardDescription className="text-xs">
-                    Klaim transfer reimbursement yang telah Anda kirimkan.
+                    Catat transfer pelunasan dana. Saldo utang Anda akan langsung berkurang seketika.
                   </CardDescription>
                 </div>
                 <Button
@@ -190,13 +190,13 @@ export function SettlementDialog({
                   />
                 </div>
 
-                <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-md text-[11px] text-amber-800 space-y-1 leading-relaxed">
+                <div className="p-3 bg-emerald-50/70 border border-emerald-200/80 rounded-md text-[11px] text-emerald-800 space-y-1 leading-relaxed">
                   <div className="font-semibold flex items-center gap-1">
-                    Aturan Buku Kas:
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700" />
+                    Pelunasan Langsung Lunas:
                   </div>
                   <p>
-                    Status pelunasan ini akan dimulai sebagai <strong>PENDING</strong>.
-                    Saldo buku kas baru akan berubah setelah penerima dana mengonfirmasi bahwa uang telah masuk ke rekening mereka.
+                    Pembayaran ini akan <strong>langsung memotong saldo utang-piutang</strong> secara otomatis tanpa perlu menunggu konfirmasi atau status pending.
                   </p>
                 </div>
               </CardContent>
@@ -222,12 +222,12 @@ export function SettlementDialog({
                   {isSubmitting ? (
                     <>
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      Mencatat...
+                      Memproses...
                     </>
                   ) : (
                     <>
-                      <Send className="h-3.5 w-3.5" />
-                      Ajukan Pelunasan
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      Catat & Lunasi Sekarang
                     </>
                   )}
                 </Button>

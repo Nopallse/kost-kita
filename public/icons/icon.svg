@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="kostkita-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1B4332"/>
+      <stop offset="100%" stop-color="#2D6A4F"/>
+    </linearGradient>
+  </defs>
+  <!-- Background squircle -->
+  <rect width="512" height="512" rx="128" fill="url(#kostkita-grad)"/>
+  
+  <!-- Architectural K Letter -->
+  <!-- Vertical Stem -->
+  <rect x="150" y="120" width="52" height="272" rx="12" fill="#FAF9F5"/>
+  
+  <!-- Diagonal Upper Branch -->
+  <path d="M190 264 L308 132 C314 125 324 122 334 126 C344 130 350 140 348 150 L338 162 L248 264 Z" fill="#FAF9F5"/>
+  
+  <!-- Diagonal Lower Branch -->
+  <path d="M228 244 L340 366 C348 374 348 386 340 394 C332 402 320 402 312 394 L190 264 Z" fill="#FAF9F5"/>
+  
+  <!-- Financial Accent Dot -->
+  <circle cx="350" cy="136" r="22" fill="#74C69D"/>
+</svg>
+

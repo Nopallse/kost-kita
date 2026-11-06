@@ -110,15 +110,15 @@ export default async function SettlementsPage() {
             <span className="text-[11px] uppercase tracking-wider text-stone-500 font-semibold">
               Reimbursement & Pelunasan
             </span>
-            <Badge variant="outline" className="text-[10px] font-mono">
-              Idempoten
+            <Badge variant="outline" className="text-[10px] font-mono text-emerald-800 border-emerald-200 bg-emerald-50">
+              Instan Lunas
             </Badge>
           </div>
           <h1 className="text-xl sm:text-2xl font-semibold text-stone-900 mt-1">
-            Klaim & Konfirmasi Pelunasan
+            Riwayat & Catat Pelunasan
           </h1>
           <p className="text-xs text-stone-500 mt-0.5">
-            Hanya transfer yang berstatus <span className="font-semibold text-emerald-800">Terkonfirmasi</span> yang memengaruhi saldo buku kas.
+            Pelunasan langsung memotong saldo utang-piutang seketika tanpa menunggu konfirmasi status pending.
           </p>
         </div>
 
@@ -133,33 +133,24 @@ export default async function SettlementsPage() {
             householdId={household.id}
             currentMemberId={membership.id}
             members={memberOptions}
-            triggerButtonText="Catat Transfer Pelunasan"
+            triggerButtonText="Catat Pelunasan"
           />
         </div>
       </div>
 
-      {/* 1. Pending Settlements Section */}
-      <div className="space-y-3">
-        <div>
-          <h2 className="text-sm sm:text-base font-semibold text-stone-900 flex items-center gap-2">
-            <Clock className="h-4 w-4 text-amber-700" />
-            Menunggu Konfirmasi Penerima ({pendingSettlements.length})
-          </h2>
-          <p className="text-xs text-stone-500">
-            Transfer yang sudah diklaim oleh pengirim, menunggu penerima memvalidasi masuknya dana.
-          </p>
-        </div>
+      {/* 1. Pending Settlements Section (Hanya ditampilkan jika terdapat data pelunasan tertunda lama) */}
+      {pendingSettlements.length > 0 && (
+        <div className="space-y-3">
+          <div>
+            <h2 className="text-sm sm:text-base font-semibold text-stone-900 flex items-center gap-2">
+              <Clock className="h-4 w-4 text-amber-700" />
+              Menunggu Konfirmasi Penerima ({pendingSettlements.length})
+            </h2>
+            <p className="text-xs text-stone-500">
+              Transfer yang belum dikonfirmasi penerima.
+            </p>
+          </div>
 
-        {pendingSettlements.length === 0 ? (
-          <Card className="border-stone-200/80 bg-white p-6 sm:p-8 text-center shadow-sm">
-            <div className="max-w-sm mx-auto space-y-1.5">
-              <CheckCircle2 className="h-6 w-6 text-emerald-700 mx-auto" />
-              <p className="text-xs text-stone-600 font-medium">
-                Tidak ada klaim transfer yang sedang tertunda.
-              </p>
-            </div>
-          </Card>
-        ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {pendingSettlements.map((s) => {
               const payerName = s.payerMember.nickname || s.payerMember.user.name || "Anggota";
@@ -225,18 +216,18 @@ export default async function SettlementsPage() {
               );
             })}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* 2. Settlement History Section */}
       <div className="space-y-3">
         <div>
           <h2 className="text-sm sm:text-base font-semibold text-stone-900 flex items-center gap-2">
-            <HandCoins className="h-4 w-4 text-stone-700" />
-            Riwayat Pelunasan Selesai
+            <HandCoins className="h-4 w-4 text-emerald-800" />
+            Riwayat Pelunasan
           </h2>
           <p className="text-xs text-stone-500">
-            Daftar transfer pelunasan yang telah dikonfirmasi atau ditolak.
+            Daftar pelunasan transfer yang telah tercatat dan memotong saldo utang.
           </p>
         </div>
 

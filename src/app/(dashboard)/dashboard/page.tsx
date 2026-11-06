@@ -329,22 +329,22 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Pending Settlements */}
+        {/* Rute Pelunasan Utang */}
         <Card className="border-stone-200/80 bg-white shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription className="text-xs uppercase tracking-wider font-medium text-stone-500">
-              Pelunasan Tertunda
+              Rute Pelunasan Utang
             </CardDescription>
-            <CardTitle className="text-xl sm:text-2xl font-semibold text-stone-900">
-              {balanceData.pendingSettlementsCount} Klaim
+            <CardTitle className="text-xl sm:text-2xl font-mono tabular-nums font-semibold text-stone-900">
+              {balanceData.simplifiedDebts.length} Rute
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Link
-              href="/settlements"
+              href="/balances"
               className="text-[11px] text-emerald-800 font-medium hover:underline flex items-center gap-1"
             >
-              Lihat di menu pelunasan
+              Bayar langsung di sini
               <ArrowRight className="h-3 w-3" />
             </Link>
           </CardContent>

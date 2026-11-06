@@ -20,8 +20,8 @@ export type SettlementActionResult<T = unknown> = {
 };
 
 /**
- * Creates a new reimbursement settlement request (default status: PENDING).
- * Note: PENDING settlements do NOT alter ledger balances yet.
+ * Creates a new reimbursement settlement.
+ * Direct settlement: Immediately saved as CONFIRMED so balances update instantly without pending approval.
  */
 export async function createSettlementAction(
   input: CreateSettlementInput
@@ -66,16 +66,18 @@ export async function createSettlementAction(
     }
 
     const bigIntAmount = BigInt(Math.round(amount));
+    const now = new Date();
 
     const settlement = await prisma.$transaction(async (tx) => {
-      // 1. Create settlement record
+      // 1. Create settlement record directly as CONFIRMED
       const created = await tx.settlement.create({
         data: {
           householdId,
           payerMemberId: payerMembership.id,
           payeeMemberId,
           amount: bigIntAmount,
-          status: SettlementStatus.PENDING,
+          status: SettlementStatus.CONFIRMED,
+          confirmedAt: now,
           notes: notes || null,
           proofUrl: proofUrl || null,
         },
@@ -87,12 +89,14 @@ export async function createSettlementAction(
           householdId,
           entityType: "SETTLEMENT",
           entityId: created.id,
-          action: "REQUEST_SETTLEMENT",
+          action: "RECORD_SETTLEMENT",
           actorUserId: user.id,
           metadata: {
             amount: bigIntAmount.toString(),
             payerMemberId: payerMembership.id,
             payeeMemberId,
+            status: "CONFIRMED",
+            autoConfirmed: true,
           },
         },
       });

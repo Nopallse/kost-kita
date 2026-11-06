@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>KostKita — Sedang Offline</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background-color: #FAF9F5;
+      color: #1c1917;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid rgba(231, 229, 228, 0.8);
+      border-radius: 1rem;
+      padding: 2rem 1.5rem;
+      max-width: 24rem;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .icon-wrapper {
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 0.75rem;
+      background: #E8F5E9;
+      color: #2D6A4F;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+    }
+    .icon-wrapper svg {
+      width: 1.75rem;
+      height: 1.75rem;
+    }
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #0c0a09;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      font-size: 0.875rem;
+      color: #57534e;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 2.75rem;
+      background-color: #2D6A4F;
+      color: #ffffff;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.15s ease;
+    }
+    .btn:hover {
+      background-color: #1B4332;
+    }
+    .badge {
+      display: inline-block;
+      margin-top: 1rem;
+      font-size: 0.6875rem;
+      color: #78716c;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon-wrapper">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.58 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/>
+      </svg>
+    </div>
+    <h1>Tidak Ada Koneksi Internet</h1>
+    <p>KostKita membutuhkan koneksi internet untuk sinkronisasi buku kas dan integritas saldo bersama.</p>
+    <button class="btn" onclick="window.location.reload()">Muat Ulang Halaman</button>
+    <div class="badge">KostKita Editorial Ledger</div>
+  </div>
+</body>
+</html>
+

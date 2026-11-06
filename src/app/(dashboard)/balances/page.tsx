@@ -201,21 +201,21 @@ export default async function BalancesPage() {
           </CardContent>
         </Card>
 
-        {/* Pending Settlements */}
+        {/* Simplified Debts / Pelunasan */}
         <Card className="border-stone-200/80 bg-white shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription className="text-xs uppercase tracking-wider font-medium text-stone-500">
-              Pelunasan Menunggu Konfirmasi
+              Kewajiban Pelunasan
             </CardDescription>
-            <CardTitle className="text-xl sm:text-2xl font-semibold text-stone-900">
-              {balanceData.pendingSettlementsCount} Klaim
+            <CardTitle className="text-xl sm:text-2xl font-mono tabular-nums font-semibold text-stone-900">
+              {balanceData.simplifiedDebts.length} Rute
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-stone-500 leading-relaxed">
-              {balanceData.pendingSettlementsCount > 0
-                ? "Ada transfer pelunasan yang perlu dikonfirmasi penerima."
-                : "Semua pelunasan transfer telah terselesaikan."}
+              {balanceData.simplifiedDebts.length > 0
+                ? "Dapat dilunasi seketika tanpa menunggu konfirmasi."
+                : "Semua utang-piutang antar anggota telah lunas."}
             </p>
           </CardContent>
         </Card>
