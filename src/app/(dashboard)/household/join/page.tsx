@@ -96,7 +96,7 @@ export default function JoinHouseholdPage() {
               </Button>
             </Link>
 
-            <Button type="submit" size="sm" disabled={isPending} className="bg-emerald-800 hover:bg-emerald-900 gap-2">
+            <Button type="submit" size="sm" disabled={isPending} className="bg-emerald-800 hover:bg-emerald-900 gap-2 h-10 sm:h-8 px-4">
               {isPending ? (
                 <>
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />

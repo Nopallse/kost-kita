@@ -16,6 +16,7 @@ import {
   XCircle,
   FileText,
   History,
+  Tag,
 } from "lucide-react";
 import Link from "next/link";
 import { TransactionStatus } from "@prisma/client";
@@ -123,21 +124,21 @@ export default async function TransactionDetailPage({
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-4 space-y-6">
+    <div className="max-w-4xl mx-auto py-2 sm:py-4 space-y-5 sm:space-y-6">
       {/* Navigation */}
       <div className="flex items-center space-x-2">
         <Link
           href="/transactions"
-          className="text-xs text-stone-500 hover:text-stone-900 flex items-center gap-1"
+          className="text-xs text-stone-500 hover:text-stone-900 flex items-center gap-1.5 py-1"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Kembali ke Daftar Transaksi
+          <span>Kembali ke Riwayat Transaksi</span>
         </Link>
       </div>
 
       {/* Header Info */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 pb-5">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200/80 pb-4 sm:pb-5">
+        <div className="space-y-1">
           <div className="flex items-center space-x-2">
             {isVoided ? (
               <Badge variant="destructive" className="text-xs gap-1 py-0.5 bg-rose-50 text-rose-800 border-rose-200">
@@ -150,42 +151,44 @@ export default async function TransactionDetailPage({
                 Terkonfirmasi (Aktif)
               </Badge>
             )}
-            <span className="text-xs text-stone-400">•</span>
-            <span className="text-xs text-stone-500 font-mono">
+            <span className="text-xs text-stone-300">•</span>
+            <span className="text-xs text-stone-400 font-mono">
               ID: {tx.id.slice(-8)}
             </span>
           </div>
 
-          <h1 className={`text-2xl font-semibold text-stone-900 mt-1.5 ${isVoided ? "line-through text-stone-400" : ""}`}>
+          <h1 className={`text-xl sm:text-2xl font-semibold text-stone-900 leading-tight ${isVoided ? "line-through text-stone-400" : ""}`}>
             {tx.title}
           </h1>
 
-          <p className="text-xs text-stone-500 mt-1 flex items-center gap-3">
+          <div className="text-xs text-stone-500 flex flex-wrap items-center gap-x-3 gap-y-1 pt-0.5">
             <span className="flex items-center gap-1">
               <Calendar className="h-3 w-3 text-stone-400" />
               {dateFormatted}
             </span>
-            <span>•</span>
+            <span className="hidden sm:inline">•</span>
             <span className="flex items-center gap-1">
               <User className="h-3 w-3 text-stone-400" />
               Dicatat oleh {tx.creator.nickname || tx.creator.user.name}
             </span>
-          </p>
+          </div>
         </div>
 
         {/* Void Button */}
         {!isVoided && (
-          <VoidTransactionButton
-            householdId={membership.householdId}
-            transactionId={tx.id}
-            transactionTitle={tx.title}
-          />
+          <div className="w-full sm:w-auto pt-1 sm:pt-0">
+            <VoidTransactionButton
+              householdId={membership.householdId}
+              transactionId={tx.id}
+              transactionTitle={tx.title}
+            />
+          </div>
         )}
       </div>
 
       {/* Notes if any */}
       {tx.notes && (
-        <div className="p-3.5 bg-stone-50 border border-stone-200/80 rounded-md text-xs text-stone-600 flex items-start gap-2">
+        <div className="p-3.5 bg-stone-50 border border-stone-200/80 rounded-lg text-xs text-stone-600 flex items-start gap-2">
           <FileText className="h-4 w-4 text-stone-400 shrink-0 mt-0.5" />
           <div>
             <span className="font-semibold text-stone-700">Catatan:</span> {tx.notes}
@@ -194,7 +197,7 @@ export default async function TransactionDetailPage({
       )}
 
       {/* Top Split: Payment vs Responsibility Aggregation */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         {/* Payments Side */}
         <Card className="border-stone-200/80 bg-white shadow-sm">
           <CardHeader className="pb-3">
@@ -267,11 +270,80 @@ export default async function TransactionDetailPage({
 
       {/* Itemized Line Items Breakdown */}
       <div className="space-y-3">
-        <h2 className="text-base font-semibold text-stone-900">
+        <h2 className="text-sm sm:text-base font-semibold text-stone-900">
           Rincian Item Belanja ({tx.items.length} Barang)
         </h2>
 
-        <Card className="border-stone-200/80 bg-white shadow-sm overflow-hidden">
+        {/* MOBILE VIEW (< sm): Item Cards */}
+        <div className="block sm:hidden space-y-3">
+          {tx.items.map((item, idx) => (
+            <Card key={item.id} className="border-stone-200/80 bg-white p-3.5 shadow-sm space-y-2.5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-0.5">
+                  <div className="flex items-center space-x-1.5">
+                    <span className="h-4 w-4 rounded bg-stone-100 text-stone-600 text-[10px] font-bold flex items-center justify-center">
+                      {idx + 1}
+                    </span>
+                    <h3 className="font-semibold text-stone-900 text-sm">
+                      {item.name}
+                    </h3>
+                  </div>
+                  <div className="text-[11px] text-stone-500 font-mono">
+                    {item.quantity}x @ {formatIDR(item.unitPrice)}
+                  </div>
+                </div>
+
+                <div className="text-right space-y-1">
+                  <div className="font-mono font-bold text-stone-900 text-sm tabular-nums">
+                    {formatIDR(item.subtotal)}
+                  </div>
+                  {item.splitType === "SHARED" && (
+                    <Badge variant="shared" className="text-[9px] py-0">
+                      Shared
+                    </Badge>
+                  )}
+                  {item.splitType === "PERSONAL" && (
+                    <Badge variant="personal" className="text-[9px] py-0">
+                      Personal
+                    </Badge>
+                  )}
+                  {item.splitType === "CUSTOM" && (
+                    <Badge variant="custom" className="text-[9px] py-0">
+                      Kustom
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              {/* Allocations Breakdown */}
+              <div className="pt-2 border-t border-stone-100">
+                <p className="text-[10px] uppercase tracking-wider text-stone-400 font-medium mb-1.5">
+                  Pembagian Tanggung Jawab:
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {item.allocations.map((alloc) => {
+                    const name =
+                      alloc.member.nickname || alloc.member.user.name || "Anggota";
+                    return (
+                      <span
+                        key={alloc.id}
+                        className="inline-flex items-center gap-1 bg-stone-50 border border-stone-200/80 px-2 py-0.5 rounded text-[11px]"
+                      >
+                        <span className="font-medium text-stone-800">{name}:</span>
+                        <span className="font-mono font-semibold text-stone-700">
+                          {formatIDR(alloc.amount)}
+                        </span>
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        {/* DESKTOP VIEW (>= sm): Table */}
+        <Card className="hidden sm:block border-stone-200/80 bg-white shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-stone-50/80 border-b border-stone-200 text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
@@ -370,7 +442,7 @@ export default async function TransactionDetailPage({
               return (
                 <div
                   key={log.id}
-                  className="p-3 bg-stone-50/70 border border-stone-200/60 rounded-md text-xs flex items-center justify-between"
+                  className="p-3 bg-stone-50/70 border border-stone-200/60 rounded-md text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-1"
                 >
                   <div className="flex items-center space-x-2">
                     <Badge variant="outline" className="text-[10px] uppercase font-mono">
@@ -392,4 +464,3 @@ export default async function TransactionDetailPage({
     </div>
   );
 }
-

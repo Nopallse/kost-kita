@@ -67,13 +67,13 @@ export function SettlementActionButtons({
   };
 
   return (
-    <div className="flex flex-col items-end space-y-1">
-      <div className="flex items-center space-x-2">
+    <div className="w-full sm:w-auto flex flex-col sm:items-end space-y-1">
+      <div className="flex items-center space-x-2 w-full sm:w-auto">
         <Button
           size="sm"
           disabled={isPending}
           onClick={handleConfirm}
-          className="h-8 px-3 text-xs bg-emerald-800 hover:bg-emerald-900 text-white gap-1"
+          className="flex-1 sm:flex-initial h-9 sm:h-8 px-3 text-xs bg-emerald-800 hover:bg-emerald-900 text-white gap-1.5"
           title="Konfirmasi Penerimaan Dana"
         >
           {isPending ? (
@@ -81,7 +81,7 @@ export function SettlementActionButtons({
           ) : (
             <>
               <Check className="h-3.5 w-3.5" />
-              Konfirmasi
+              <span>Konfirmasi Masuk</span>
             </>
           )}
         </Button>
@@ -91,20 +91,17 @@ export function SettlementActionButtons({
           size="sm"
           disabled={isPending}
           onClick={handleReject}
-          className="h-8 px-3 text-xs text-rose-700 hover:text-rose-800 border-rose-200 hover:bg-rose-50 gap-1"
+          className="flex-1 sm:flex-initial h-9 sm:h-8 px-3 text-xs text-rose-700 hover:text-rose-800 border-rose-200 hover:bg-rose-50 gap-1.5"
           title="Tolak Klaim"
         >
           <X className="h-3.5 w-3.5" />
-          Tolak
+          <span>Tolak</span>
         </Button>
       </div>
 
       {errorMsg && (
-        <span className="text-[11px] text-rose-700 font-medium">
-          {errorMsg}
-        </span>
+        <p className="text-[11px] text-rose-600 font-medium">{errorMsg}</p>
       )}
     </div>
   );
 }
-

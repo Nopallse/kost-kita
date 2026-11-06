@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { formatIDR } from "@/lib/utils";
 import { HandCoins, Loader2, Send, X, AlertCircle } from "lucide-react";
 
@@ -94,15 +93,18 @@ export function SettlementDialog({
       <Button
         size="sm"
         onClick={() => setIsOpen(true)}
-        className="text-xs bg-emerald-800 hover:bg-emerald-900 text-white gap-1.5"
+        className="w-full sm:w-auto text-xs bg-emerald-800 hover:bg-emerald-900 text-white gap-1.5 h-9"
       >
         <HandCoins className="h-3.5 w-3.5" />
-        {triggerButtonText}
+        <span>{triggerButtonText}</span>
       </Button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="max-w-md w-full bg-white border-stone-200 shadow-xl animate-in fade-in-0 zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <Card className="w-full sm:max-w-md bg-white border-stone-200 shadow-2xl rounded-b-none sm:rounded-xl max-h-[92vh] overflow-y-auto animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+            {/* Mobile Drawer Pill Handle */}
+            <div className="w-10 h-1 bg-stone-300 rounded-full mx-auto mt-3 sm:hidden" />
+
             <form onSubmit={handleSubmit}>
               <CardHeader className="flex flex-row items-start justify-between pb-3">
                 <div>
@@ -120,6 +122,7 @@ export function SettlementDialog({
                   size="sm"
                   onClick={() => setIsOpen(false)}
                   className="h-8 w-8 p-0 text-stone-400 hover:text-stone-700"
+                  aria-label="Tutup dialog"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -134,13 +137,14 @@ export function SettlementDialog({
                 )}
 
                 <div className="space-y-1.5">
-                  <Label>Kirim Dana Kepada</Label>
+                  <Label htmlFor="payeeId">Kirim Dana Kepada</Label>
                   <select
+                    id="payeeId"
                     value={payeeId}
                     onChange={(e) => setPayeeId(e.target.value)}
                     required
                     disabled={isSubmitting}
-                    className="w-full text-xs bg-white border border-stone-300 rounded px-2.5 py-2 text-stone-900"
+                    className="w-full text-sm bg-white border border-stone-300 rounded-md px-3 py-2 text-stone-900 focus:outline-none focus:ring-1 focus:ring-emerald-800"
                   >
                     {eligiblePayees.map((m) => (
                       <option key={m.id} value={m.id}>
@@ -152,13 +156,15 @@ export function SettlementDialog({
 
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <Label>Nominal Transfer (Rp)</Label>
-                    <span className="text-[11px] font-mono text-emerald-800 font-semibold">
+                    <Label htmlFor="amount">Nominal Transfer (Rp)</Label>
+                    <span className="text-xs font-mono text-emerald-800 font-semibold">
                       {formatIDR(amount || 0)}
                     </span>
                   </div>
                   <Input
+                    id="amount"
                     type="number"
+                    inputMode="numeric"
                     min="1"
                     step="1"
                     placeholder="0"
@@ -168,21 +174,23 @@ export function SettlementDialog({
                     }
                     required
                     disabled={isSubmitting}
-                    className="font-mono text-sm tabular-nums"
+                    className="font-mono text-base tabular-nums h-11"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Catatan / Metode Transfer</Label>
+                  <Label htmlFor="notes">Catatan / Metode Transfer</Label>
                   <Input
+                    id="notes"
                     placeholder="Contoh: Transfer QRIS / BCA"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     disabled={isSubmitting}
+                    className="text-sm h-10"
                   />
                 </div>
 
-                <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-md text-[11px] text-amber-800 space-y-1">
+                <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-md text-[11px] text-amber-800 space-y-1 leading-relaxed">
                   <div className="font-semibold flex items-center gap-1">
                     Aturan Buku Kas:
                   </div>
@@ -193,13 +201,14 @@ export function SettlementDialog({
                 </div>
               </CardContent>
 
-              <CardFooter className="flex items-center justify-end space-x-2 border-t border-stone-100 pt-4">
+              <CardFooter className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center sm:justify-end gap-2 sm:space-x-2 border-t border-stone-100 pt-4 pb-6 sm:pb-4">
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsOpen(false)}
                   disabled={isSubmitting}
+                  className="w-full sm:w-auto h-10 sm:h-9 text-xs"
                 >
                   Batal
                 </Button>
@@ -208,7 +217,7 @@ export function SettlementDialog({
                   type="submit"
                   size="sm"
                   disabled={isSubmitting || amount <= 0}
-                  className="bg-emerald-800 hover:bg-emerald-900 text-white gap-1.5"
+                  className="w-full sm:w-auto bg-emerald-800 hover:bg-emerald-900 text-white gap-1.5 h-10 sm:h-9 text-xs"
                 >
                   {isSubmitting ? (
                     <>
@@ -230,4 +239,3 @@ export function SettlementDialog({
     </>
   );
 }
-

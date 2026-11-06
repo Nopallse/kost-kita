@@ -95,7 +95,7 @@ export function SettingsForm({ household }: SettingsFormProps) {
               type="submit"
               size="sm"
               disabled={isUpdatePending}
-              className="bg-stone-900 hover:bg-stone-800 text-white gap-2"
+              className="bg-stone-900 hover:bg-stone-800 text-white gap-2 h-10 sm:h-8 px-4"
             >
               {isUpdatePending ? (
                 <>
@@ -147,7 +147,7 @@ export function SettingsForm({ household }: SettingsFormProps) {
               size="sm"
               onClick={handleRegenerateCode}
               disabled={isRegenerating}
-              className="text-xs border-stone-300 gap-1.5 hover:bg-stone-100"
+              className="text-xs border-stone-300 gap-1.5 hover:bg-stone-100 h-9 sm:h-8"
             >
               {isRegenerating ? (
                 <>

@@ -80,19 +80,19 @@ export default async function ReportsPage() {
   const avgPerTx = transactionCount > 0 ? totalExpense / BigInt(transactionCount) : 0n;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-stone-200/80 pb-4 sm:pb-5">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-xs uppercase tracking-wider text-stone-500 font-semibold">
+            <span className="text-[11px] uppercase tracking-wider text-stone-500 font-semibold">
               Analisis & Ekspor Data
             </span>
-            <Badge variant="outline" className="text-[11px] font-mono">
+            <Badge variant="outline" className="text-[10px] font-mono">
               Buku Kas
             </Badge>
           </div>
-          <h1 className="text-2xl font-semibold text-stone-900 mt-1">
+          <h1 className="text-xl sm:text-2xl font-semibold text-stone-900 mt-1">
             Laporan Finansial Rumah Tangga
           </h1>
           <p className="text-xs text-stone-500 mt-0.5">
@@ -100,9 +100,9 @@ export default async function ReportsPage() {
           </p>
         </div>
 
-        <div className="flex items-center space-x-2.5">
-          <a href="/api/export" download>
-            <Button size="sm" className="bg-emerald-800 hover:bg-emerald-900 text-white gap-2 text-xs">
+        <div className="flex items-center space-x-2.5 w-full sm:w-auto">
+          <a href="/api/export" download className="w-full sm:w-auto">
+            <Button size="sm" className="w-full sm:w-auto bg-emerald-800 hover:bg-emerald-900 text-white gap-2 text-xs h-9">
               <Download className="h-3.5 w-3.5" />
               Ekspor Buku Kas (.CSV)
             </Button>
@@ -111,80 +111,80 @@ export default async function ReportsPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card className="border-stone-200/80 bg-white shadow-sm">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase tracking-wider font-medium text-stone-500">
-              Total Pengeluaran Kas
+          <CardHeader className="pb-1.5 sm:pb-2 p-3 sm:p-5">
+            <CardDescription className="text-[11px] uppercase tracking-wider font-medium text-stone-500 truncate">
+              Total Pengeluaran
             </CardDescription>
-            <CardTitle className="text-2xl font-mono tabular-nums font-semibold text-stone-900">
+            <CardTitle className="text-lg sm:text-2xl font-mono tabular-nums font-semibold text-stone-900">
               {formatIDR(totalExpense)}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-[11px] text-stone-500">
-              Dari {transactionCount} transaksi terkonfirmasi
+          <CardContent className="p-3 pt-0 sm:p-5 sm:pt-0">
+            <p className="text-[10px] sm:text-[11px] text-stone-500 truncate">
+              Dari {transactionCount} transaksi
             </p>
           </CardContent>
         </Card>
 
         <Card className="border-stone-200/80 bg-white shadow-sm">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase tracking-wider font-medium text-stone-500">
-              Rata-Rata per Transaksi
+          <CardHeader className="pb-1.5 sm:pb-2 p-3 sm:p-5">
+            <CardDescription className="text-[11px] uppercase tracking-wider font-medium text-stone-500 truncate">
+              Rata-Rata Transaksi
             </CardDescription>
-            <CardTitle className="text-2xl font-mono tabular-nums font-semibold text-stone-900">
+            <CardTitle className="text-lg sm:text-2xl font-mono tabular-nums font-semibold text-stone-900">
               {formatIDR(avgPerTx)}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-[11px] text-stone-500">
-              Rata-rata nominal setiap kali belanja
+          <CardContent className="p-3 pt-0 sm:p-5 sm:pt-0">
+            <p className="text-[10px] sm:text-[11px] text-stone-500 truncate">
+              Nominal rata-rata belanja
             </p>
           </CardContent>
         </Card>
 
         <Card className="border-stone-200/80 bg-white shadow-sm">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase tracking-wider font-medium text-stone-500">
-              Total Belanja Bersama
+          <CardHeader className="pb-1.5 sm:pb-2 p-3 sm:p-5">
+            <CardDescription className="text-[11px] uppercase tracking-wider font-medium text-stone-500 truncate">
+              Belanja Bersama
             </CardDescription>
-            <CardTitle className="text-2xl font-mono tabular-nums font-semibold text-emerald-800">
+            <CardTitle className="text-lg sm:text-2xl font-mono tabular-nums font-semibold text-emerald-800">
               {formatIDR(totalShared)}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-[11px] text-stone-500">
+          <CardContent className="p-3 pt-0 sm:p-5 sm:pt-0">
+            <p className="text-[10px] sm:text-[11px] text-stone-500 truncate">
               {totalExpense > 0n
-                ? `${Math.round(Number((totalShared * 100n) / totalExpense))}% dari seluruh belanjaan`
+                ? `${Math.round(Number((totalShared * 100n) / totalExpense))}% dari kas`
                 : "0%"}
             </p>
           </CardContent>
         </Card>
 
         <Card className="border-stone-200/80 bg-white shadow-sm">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase tracking-wider font-medium text-stone-500">
-              Total Item Tercatat
+          <CardHeader className="pb-1.5 sm:pb-2 p-3 sm:p-5">
+            <CardDescription className="text-[11px] uppercase tracking-wider font-medium text-stone-500 truncate">
+              Item Tercatat
             </CardDescription>
-            <CardTitle className="text-2xl font-semibold text-stone-900">
+            <CardTitle className="text-lg sm:text-2xl font-semibold text-stone-900">
               {items.length} Barang
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-[11px] text-stone-500">
-              Item belanja berbutir dalam pembukuan
+          <CardContent className="p-3 pt-0 sm:p-5 sm:pt-0">
+            <p className="text-[10px] sm:text-[11px] text-stone-500 truncate">
+              Item belanja rinci
             </p>
           </CardContent>
         </Card>
       </div>
 
       {/* Breakdown per Member */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {/* Kontribusi Setor Kasir */}
         <Card className="border-stone-200/80 bg-white shadow-sm">
           <CardHeader className="pb-3 border-b border-stone-100">
-            <CardTitle className="text-base font-semibold text-stone-900 flex items-center gap-2">
+            <CardTitle className="text-sm sm:text-base font-semibold text-stone-900 flex items-center gap-2">
               <CreditCard className="h-4 w-4 text-emerald-800" />
               Kontribusi Setoran Kasir (Uang Keluar)
             </CardTitle>
@@ -192,7 +192,7 @@ export default async function ReportsPage() {
               Anggota yang paling sering menalangi pembayaran di kasir.
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-4 space-y-3">
+          <CardContent className="p-3.5 sm:p-4 space-y-3">
             {balanceData.enrichedPositions.map((pos) => {
               const pct =
                 totalExpense > 0n
@@ -202,16 +202,16 @@ export default async function ReportsPage() {
               return (
                 <div key={pos.memberId} className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-stone-900">
+                    <span className="font-medium text-stone-900 truncate max-w-[160px]">
                       {pos.name} {pos.isCurrentUser && "(Anda)"}
                     </span>
-                    <span className="font-mono tabular-nums font-semibold text-stone-800">
+                    <span className="font-mono tabular-nums font-semibold text-stone-800 shrink-0">
                       {formatIDR(pos.totalPaid)} ({pct}%)
                     </span>
                   </div>
-                  <div className="h-1.5 w-full bg-stone-100 rounded-full overflow-hidden">
+                  <div className="h-2 w-full bg-stone-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-emerald-700 rounded-full transition-all"
+                      className="h-full bg-emerald-700 rounded-full transition-all duration-300"
                       style={{ width: `${Math.min(100, pct)}%` }}
                     />
                   </div>
@@ -224,7 +224,7 @@ export default async function ReportsPage() {
         {/* Beban Tanggung Jawab */}
         <Card className="border-stone-200/80 bg-white shadow-sm">
           <CardHeader className="pb-3 border-b border-stone-100">
-            <CardTitle className="text-base font-semibold text-stone-900 flex items-center gap-2">
+            <CardTitle className="text-sm sm:text-base font-semibold text-stone-900 flex items-center gap-2">
               <Receipt className="h-4 w-4 text-stone-700" />
               Beban Konsumsi & Tanggung Jawab
             </CardTitle>
@@ -232,7 +232,7 @@ export default async function ReportsPage() {
               Akumulasi nilai barang dan kebutuhan yang dinikmati setiap anggota.
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-4 space-y-3">
+          <CardContent className="p-3.5 sm:p-4 space-y-3">
             {balanceData.enrichedPositions.map((pos) => {
               const pct =
                 totalExpense > 0n
@@ -244,16 +244,16 @@ export default async function ReportsPage() {
               return (
                 <div key={pos.memberId} className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-stone-900">
+                    <span className="font-medium text-stone-900 truncate max-w-[160px]">
                       {pos.name} {pos.isCurrentUser && "(Anda)"}
                     </span>
-                    <span className="font-mono tabular-nums font-semibold text-stone-800">
+                    <span className="font-mono tabular-nums font-semibold text-stone-800 shrink-0">
                       {formatIDR(pos.totalResponsibility)} ({pct}%)
                     </span>
                   </div>
-                  <div className="h-1.5 w-full bg-stone-100 rounded-full overflow-hidden">
+                  <div className="h-2 w-full bg-stone-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-stone-700 rounded-full transition-all"
+                      className="h-full bg-stone-700 rounded-full transition-all duration-300"
                       style={{ width: `${Math.min(100, pct)}%` }}
                     />
                   </div>
@@ -265,7 +265,7 @@ export default async function ReportsPage() {
       </div>
 
       {/* CSV Export Information Box */}
-      <Card className="border-stone-200/80 bg-stone-50/70 p-6 shadow-sm">
+      <Card className="border-stone-200/80 bg-stone-50/70 p-4 sm:p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-start space-x-3.5">
             <div className="h-10 w-10 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
@@ -281,8 +281,8 @@ export default async function ReportsPage() {
             </div>
           </div>
 
-          <a href="/api/export" download className="shrink-0">
-            <Button size="sm" className="bg-emerald-800 hover:bg-emerald-900 text-white gap-2 text-xs">
+          <a href="/api/export" download className="w-full sm:w-auto shrink-0">
+            <Button size="sm" className="w-full sm:w-auto bg-emerald-800 hover:bg-emerald-900 text-white gap-2 text-xs h-9">
               <Download className="h-3.5 w-3.5" />
               Unduh CSV
             </Button>
@@ -292,4 +292,3 @@ export default async function ReportsPage() {
     </div>
   );
 }
-

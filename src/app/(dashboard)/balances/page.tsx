@@ -18,6 +18,8 @@ import {
   AlertTriangle,
   Receipt,
   User,
+  ArrowUpRight,
+  ArrowDownLeft,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -74,18 +76,18 @@ export default async function BalancesPage() {
     : { formatted: formatIDR(0), isPositive: false, isNegative: false, isZero: true };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-stone-200/80 pb-4 sm:pb-5">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-xs uppercase tracking-wider text-stone-500 font-semibold">
+            <span className="text-[11px] uppercase tracking-wider text-stone-500 font-semibold">
               Buku Kas & Rekonsiliasi Saldo
             </span>
             {balanceData.report.isReconciled ? (
               <Badge variant="shared" className="text-[10px] gap-1 py-0.2">
                 <ShieldCheck className="h-3 w-3 text-emerald-700" />
-                Zero-Sum Terverifikasi (Σ Saldo = Rp0)
+                Zero-Sum Terverifikasi
               </Badge>
             ) : (
               <Badge variant="destructive" className="text-[10px] gap-1 py-0.2">
@@ -94,7 +96,7 @@ export default async function BalancesPage() {
               </Badge>
             )}
           </div>
-          <h1 className="text-2xl font-semibold text-stone-900 mt-1">
+          <h1 className="text-xl sm:text-2xl font-semibold text-stone-900 mt-1">
             Matriks Saldo & Utang
           </h1>
           <p className="text-xs text-stone-500 mt-0.5">
@@ -102,9 +104,9 @@ export default async function BalancesPage() {
           </p>
         </div>
 
-        <div className="flex items-center space-x-2.5">
-          <Link href="/settlements">
-            <Button variant="outline" size="sm" className="text-xs border-stone-300 gap-1.5 bg-white">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:space-x-2.5 w-full sm:w-auto">
+          <Link href="/settlements" className="w-full sm:w-auto">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto text-xs border-stone-300 gap-1.5 bg-white h-9">
               <HandCoins className="h-3.5 w-3.5" />
               Kelola Pelunasan
               {balanceData.pendingSettlementsCount > 0 && (
@@ -125,15 +127,44 @@ export default async function BalancesPage() {
       </div>
 
       {/* Summary KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {/* Your Position */}
-        <Card className="border-stone-200/80 bg-white shadow-sm">
+        <Card
+          className={`border-stone-200/80 bg-white shadow-sm ${
+            userNetInfo.isPositive
+              ? "border-emerald-300/80 bg-gradient-to-br from-emerald-50/40 to-white"
+              : userNetInfo.isNegative
+              ? "border-rose-300/80 bg-gradient-to-br from-rose-50/40 to-white"
+              : ""
+          }`}
+        >
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase tracking-wider font-medium text-stone-500">
-              Posisi Saldo Bersih Anda
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <CardDescription className="text-xs uppercase tracking-wider font-medium text-stone-500">
+                Posisi Saldo Bersih Anda
+              </CardDescription>
+              {userNetInfo.isPositive && (
+                <Badge variant="shared" className="text-[10px] gap-1 py-0.2">
+                  <ArrowUpRight className="h-2.5 w-2.5 text-emerald-700" />
+                  Piutang
+                </Badge>
+              )}
+              {userNetInfo.isNegative && (
+                <Badge variant="destructive" className="text-[10px] gap-1 py-0.2 bg-rose-50 text-rose-800 border-rose-200">
+                  <ArrowDownLeft className="h-2.5 w-2.5 text-rose-700" />
+                  Utang
+                </Badge>
+              )}
+              {userNetInfo.isZero && (
+                <Badge variant="secondary" className="text-[10px] gap-1 py-0.2">
+                  <CheckCircle2 className="h-2.5 w-2.5 text-stone-600" />
+                  Lunas
+                </Badge>
+              )}
+            </div>
+
             <CardTitle
-              className={`text-2xl font-mono tabular-nums font-semibold flex items-center gap-1.5 ${
+              className={`text-2xl sm:text-3xl font-mono tabular-nums font-bold tracking-tight ${
                 userNetInfo.isPositive
                   ? "text-emerald-800"
                   : userNetInfo.isNegative
@@ -145,7 +176,7 @@ export default async function BalancesPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-stone-500">
+            <p className="text-xs text-stone-500 leading-relaxed">
               {userNetInfo.isPositive && "Anda berhak menerima pengembalian dana dari teman kost."}
               {userNetInfo.isNegative && "Anda perlu membayar pelunasan ke teman kost yang menalangi."}
               {userNetInfo.isZero && "Semua pengeluaran Anda saat ini telah seimbang sempurna."}
@@ -159,13 +190,13 @@ export default async function BalancesPage() {
             <CardDescription className="text-xs uppercase tracking-wider font-medium text-stone-500">
               Total Pengeluaran Kas
             </CardDescription>
-            <CardTitle className="text-2xl font-mono tabular-nums font-semibold text-stone-900">
+            <CardTitle className="text-xl sm:text-2xl font-mono tabular-nums font-semibold text-stone-900">
               {formatIDR(balanceData.report.totalHouseholdExpense)}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-stone-500">
-              Akumulasi seluruh transaksi terkonfirmasi.
+            <p className="text-xs text-stone-500 leading-relaxed">
+              Akumulasi seluruh transaksi belanja terkonfirmasi.
             </p>
           </CardContent>
         </Card>
@@ -176,12 +207,12 @@ export default async function BalancesPage() {
             <CardDescription className="text-xs uppercase tracking-wider font-medium text-stone-500">
               Pelunasan Menunggu Konfirmasi
             </CardDescription>
-            <CardTitle className="text-2xl font-semibold text-stone-900">
+            <CardTitle className="text-xl sm:text-2xl font-semibold text-stone-900">
               {balanceData.pendingSettlementsCount} Klaim
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-stone-500">
+            <p className="text-xs text-stone-500 leading-relaxed">
               {balanceData.pendingSettlementsCount > 0
                 ? "Ada transfer pelunasan yang perlu dikonfirmasi penerima."
                 : "Semua pelunasan transfer telah terselesaikan."}
@@ -192,20 +223,18 @@ export default async function BalancesPage() {
 
       {/* Section 1: Simplified Pairwise Debts ("Who Owes Whom") */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold text-stone-900 flex items-center gap-2">
-              <Scale className="h-4 w-4 text-emerald-800" />
-              Penyederhanaan Utang (Siapa Berutang ke Siapa)
-            </h2>
-            <p className="text-xs text-stone-500">
-              Rute transfer paling efisien untuk melunasi seluruh kewajiban anggota kost.
-            </p>
-          </div>
+        <div>
+          <h2 className="text-sm sm:text-base font-semibold text-stone-900 flex items-center gap-2">
+            <Scale className="h-4 w-4 text-emerald-800" />
+            Penyederhanaan Utang (Siapa Berutang ke Siapa)
+          </h2>
+          <p className="text-xs text-stone-500">
+            Rute transfer paling efisien untuk melunasi seluruh kewajiban anggota kost.
+          </p>
         </div>
 
         {balanceData.simplifiedDebts.length === 0 ? (
-          <Card className="border-stone-200/80 bg-white p-8 text-center shadow-sm">
+          <Card className="border-stone-200/80 bg-white p-6 sm:p-8 text-center shadow-sm">
             <div className="max-w-sm mx-auto space-y-2">
               <CheckCircle2 className="h-8 w-8 text-emerald-700 mx-auto" />
               <h3 className="font-semibold text-stone-900 text-sm">
@@ -230,7 +259,7 @@ export default async function BalancesPage() {
                       : ""
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="space-y-1">
                       <div className="flex items-center space-x-2 text-xs">
                         <span className="font-semibold text-stone-900">
@@ -241,7 +270,7 @@ export default async function BalancesPage() {
                             </span>
                           )}
                         </span>
-                        <ArrowRight className="h-3 w-3 text-stone-400" />
+                        <ArrowRight className="h-3 w-3 text-stone-400 shrink-0" />
                         <span className="font-semibold text-stone-900">
                           {debt.toMemberName}
                           {debt.isCurrentUserCreditor && (
@@ -256,7 +285,7 @@ export default async function BalancesPage() {
                       </p>
                     </div>
 
-                    <div className="text-right space-y-1">
+                    <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-stone-100">
                       <div className="font-mono text-base font-bold tabular-nums text-stone-900">
                         {formatIDR(debt.amount)}
                       </div>
@@ -283,7 +312,7 @@ export default async function BalancesPage() {
       {/* Section 2: Detailed Member Positions Matrix */}
       <div className="space-y-3">
         <div>
-          <h2 className="text-base font-semibold text-stone-900 flex items-center gap-2">
+          <h2 className="text-sm sm:text-base font-semibold text-stone-900 flex items-center gap-2">
             <User className="h-4 w-4 text-stone-700" />
             Rincian Posisi Finansial per Anggota
           </h2>
@@ -292,7 +321,7 @@ export default async function BalancesPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
           {balanceData.enrichedPositions.map((pos) => {
             const net = formatNetBalance(pos.netBalance);
 
@@ -300,7 +329,7 @@ export default async function BalancesPage() {
               <Card
                 key={pos.memberId}
                 className={`border-stone-200/80 bg-white shadow-sm overflow-hidden ${
-                  pos.isCurrentUser ? "ring-1 ring-stone-900/10" : ""
+                  pos.isCurrentUser ? "ring-1 ring-stone-900/10 shadow-md" : ""
                 }`}
               >
                 <CardHeader className="pb-3 border-b border-stone-100 bg-stone-50/50">
@@ -334,7 +363,7 @@ export default async function BalancesPage() {
                   </div>
                 </CardHeader>
 
-                <CardContent className="p-4 space-y-2.5 text-xs">
+                <CardContent className="p-3.5 sm:p-4 space-y-2.5 text-xs">
                   <div className="flex items-center justify-between text-stone-600">
                     <span>Total Dana Disetor:</span>
                     <span className="font-mono font-medium text-stone-900 tabular-nums">
@@ -393,4 +422,3 @@ export default async function BalancesPage() {
     </div>
   );
 }
-

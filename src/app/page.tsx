@@ -16,18 +16,18 @@ export default async function HomePage() {
     <div className="flex min-h-screen flex-col bg-[#FAF9F5] text-stone-900">
       {/* Editorial Navigation */}
       <header className="border-b border-stone-200/80 bg-white/70 backdrop-blur-md sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="h-6 w-6 rounded bg-emerald-800 flex items-center justify-center text-white text-xs font-bold tracking-wider">
               K
             </div>
             <span className="font-semibold tracking-tight text-stone-900 text-lg">KostKita</span>
-            <Badge variant="outline" className="text-[10px] text-stone-500 border-stone-300">
+            <Badge variant="outline" className="hidden sm:inline-flex text-[10px] text-stone-500 border-stone-300">
               Editorial Ledger
             </Badge>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             <Link href="/login">
               <Button variant="ghost" size="sm" className="text-stone-700 hover:text-stone-950">
                 Masuk
@@ -43,31 +43,31 @@ export default async function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <main className="flex-1 max-w-5xl mx-auto px-6 py-20">
-        <div className="max-w-2xl space-y-6">
+      <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
+        <div className="max-w-2xl space-y-5 sm:space-y-6">
           <Badge variant="shared" className="text-xs">
             Sistem Manajemen Finansial Bersama
           </Badge>
 
-          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.15] text-stone-950">
+          <h1 className="text-3xl sm:text-5xl font-semibold tracking-tight leading-[1.2] sm:leading-[1.15] text-stone-950">
             Kejelasan finansial untuk tempat tinggal bersama.
           </h1>
 
-          <p className="text-lg text-stone-600 leading-relaxed font-normal">
+          <p className="text-base sm:text-lg text-stone-600 leading-relaxed font-normal">
             KostKita membedakan secara tegas antara <strong>apa yang dibeli</strong>,{" "}
             <strong>siapa yang bertanggung jawab</strong>, dan <strong>siapa yang membayar</strong>.
             Kalkulasi berbasis integer Rupiah presisi tanpa pembulatan mengambang.
           </p>
 
           <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <Link href="/register">
-              <Button size="lg" className="w-full sm:w-auto bg-emerald-800 hover:bg-emerald-900 text-white gap-2 font-medium">
+            <Link href="/register" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto bg-emerald-800 hover:bg-emerald-900 text-white gap-2 font-medium h-12 sm:h-10 text-base sm:text-sm">
                 Daftar Akun Instan
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <Link href="/login">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto border-stone-300 bg-white hover:bg-stone-50">
+            <Link href="/login" className="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto border-stone-300 bg-white hover:bg-stone-50 h-12 sm:h-10 text-base sm:text-sm">
                 Masuk ke Akun
               </Button>
             </Link>
@@ -75,7 +75,7 @@ export default async function HomePage() {
         </div>
 
         {/* 4 Pilar Arsitektur Finansial */}
-        <section className="mt-24 pt-12 border-t border-stone-200">
+        <section className="mt-16 sm:mt-24 pt-8 sm:pt-12 border-t border-stone-200">
           <p className="text-xs uppercase tracking-widest text-stone-500 font-semibold mb-6">
             Pilar Integritas Buku Kas
           </p>

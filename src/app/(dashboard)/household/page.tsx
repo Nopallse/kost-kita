@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { InviteCodeCard } from "@/components/household/invite-code-card";
@@ -14,6 +14,7 @@ import {
   Shield,
   ShieldCheck,
   Calendar,
+  Mail,
 } from "lucide-react";
 import Link from "next/link";
 import { Role } from "@prisma/client";
@@ -65,47 +66,47 @@ export default async function HouseholdPage() {
   const currentUserId = session.user.id;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-stone-200/80 pb-4 sm:pb-5">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-xs uppercase tracking-wider text-stone-500 font-semibold">
+            <span className="text-[11px] uppercase tracking-wider text-stone-500 font-semibold">
               Manajemen Rumah Tangga
             </span>
-            <Badge variant="outline" className="text-[11px] font-mono">
+            <Badge variant="outline" className="text-[10px] font-mono">
               {household.currency}
             </Badge>
           </div>
-          <h1 className="text-2xl font-semibold text-stone-900 mt-1">
+          <h1 className="text-xl sm:text-2xl font-semibold text-stone-900 mt-1">
             {household.name}
           </h1>
           <p className="text-xs text-stone-500 mt-0.5">
             Peran Anda:{" "}
-            <span className="font-medium text-stone-800">
+            <span className="font-semibold text-stone-800">
               {currentMembership.role === Role.ADMIN ? "Admin (Pengelola)" : "Anggota (Member)"}
             </span>
           </p>
         </div>
 
-        <div className="flex items-center space-x-2.5">
-          <Link href="/household/new">
-            <Button variant="outline" size="sm" className="text-xs border-stone-300 gap-1.5">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <Link href="/household/new" className="flex-1 sm:flex-initial">
+            <Button variant="outline" size="sm" className="w-full text-xs border-stone-300 gap-1.5 h-9 bg-white">
               <PlusCircle className="h-3.5 w-3.5" />
-              Kost Baru
+              <span>Kost Baru</span>
             </Button>
           </Link>
-          <Link href="/household/join">
-            <Button variant="outline" size="sm" className="text-xs border-stone-300 gap-1.5">
+          <Link href="/household/join" className="flex-1 sm:flex-initial">
+            <Button variant="outline" size="sm" className="w-full text-xs border-stone-300 gap-1.5 h-9 bg-white">
               <UserPlus className="h-3.5 w-3.5" />
-              Gabung Kost Lain
+              <span>Gabung Lain</span>
             </Button>
           </Link>
           {isCurrentUserAdmin && (
-            <Link href="/household/settings">
-              <Button size="sm" className="text-xs bg-stone-900 hover:bg-stone-800 text-white gap-1.5">
+            <Link href="/household/settings" className="w-full sm:w-auto">
+              <Button size="sm" className="w-full sm:w-auto text-xs bg-stone-900 hover:bg-stone-800 text-white gap-1.5 h-9">
                 <Settings className="h-3.5 w-3.5" />
-                Pengaturan
+                <span>Pengaturan Kost</span>
               </Button>
             </Link>
           )}
@@ -122,7 +123,7 @@ export default async function HouseholdPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Users className="h-4 w-4 text-stone-700" />
-            <h2 className="text-base font-semibold text-stone-900">
+            <h2 className="text-sm sm:text-base font-semibold text-stone-900">
               Daftar Anggota Rumah Tangga
             </h2>
           </div>
@@ -131,7 +132,76 @@ export default async function HouseholdPage() {
           </span>
         </div>
 
-        <Card className="border-stone-200/80 bg-white shadow-sm overflow-hidden">
+        {/* MOBILE VIEW (< sm): Member Cards */}
+        <div className="block sm:hidden space-y-2.5">
+          {household.members.map((member) => {
+            const isYou = member.userId === currentUserId;
+            const joinFormatted = new Intl.DateTimeFormat("id-ID", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            }).format(new Date(member.joinedAt));
+
+            return (
+              <Card key={member.id} className="border-stone-200/80 bg-white p-3.5 shadow-sm space-y-2.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="h-9 w-9 rounded-full bg-emerald-800 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                      {(member.nickname || member.user.name || "A")
+                        .slice(0, 2)
+                        .toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="font-semibold text-stone-900 text-sm flex items-center gap-1.5">
+                        {member.nickname || member.user.name || "Tanpa Nama"}
+                        {isYou && (
+                          <span className="text-[10px] bg-stone-100 text-stone-600 px-1.5 py-0.2 rounded font-normal">
+                            Anda
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-stone-500 font-mono flex items-center gap-1 mt-0.5">
+                        <Mail className="h-3 w-3 text-stone-400" />
+                        <span className="truncate max-w-[200px]">{member.user.email}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {member.role === Role.ADMIN ? (
+                    <Badge variant="shared" className="text-[10px] gap-1 py-0.5 shrink-0">
+                      <ShieldCheck className="h-3 w-3 text-emerald-700" />
+                      Admin
+                    </Badge>
+                  ) : (
+                    <Badge variant="personal" className="text-[10px] py-0.5 shrink-0">
+                      Anggota
+                    </Badge>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-stone-100 text-xs">
+                  <div className="text-[11px] text-stone-400 flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    <span>Sejak {joinFormatted}</span>
+                  </div>
+
+                  {isCurrentUserAdmin && (
+                    <MemberRowActions
+                      householdId={household.id}
+                      memberId={member.id}
+                      currentRole={member.role}
+                      isActive={member.isActive}
+                      isCurrentUser={isYou}
+                    />
+                  )}
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* DESKTOP VIEW (>= sm): Members Table */}
+        <Card className="hidden sm:block border-stone-200/80 bg-white shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-stone-50/80 border-b border-stone-200 text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
